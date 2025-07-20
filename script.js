@@ -31,6 +31,9 @@ function setupEventListeners() {
 // Запуск камеры
 async function startCamera() {
   try {
+    // Показываем контейнер перед запуском камеры
+    document.querySelector('.camera-container').style.display = 'block';
+    
     cameraStream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: 'environment',
@@ -48,6 +51,8 @@ async function startCamera() {
     UI.cameraView.style.opacity = 0;
     setTimeout(() => UI.cameraView.style.opacity = 1, 50);
   } catch (error) {
+    // В случае ошибки снова скрываем контейнер
+    document.querySelector('.camera-container').style.display = 'none';
     showError('Не удалось получить доступ к камере');
     console.error('Camera error:', error);
   }
@@ -112,6 +117,7 @@ function showAnalysisResult(data) {
 // Сброс камеры
 function resetCamera() {
   stopCameraStream();
+  document.querySelector('.camera-container').style.display = 'none'; // Скрываем контейнер
   UI.capturedImage.style.display = 'none';
   UI.confirmButtons.style.display = 'none';
   UI.scanButton.style.display = 'block';

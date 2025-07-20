@@ -183,3 +183,17 @@ header {
     font-size: 0.9rem;
   }
 }
+
+
+.camera-container {
+  display: none; /* Скрываем контейнер камеры по умолчанию */
+  position: relative;
+  margin: 1.5rem auto; /* Центрируем */
+  /* ... остальные стили остаются прежними ... */
+}
+
+.scan-button-container {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
