@@ -1,35 +1,57 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcogramScan - Анализ состава продукта</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcogramScan | Анализ состава продуктов</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <h1>EcogramScan</h1>
-        <p>Сфотографируйте состав продукта для анализа</p>
-        
-        <button id="scanButton">Сканировать состав</button>
-        
-        <video id="cameraView" autoplay></video>
-        <canvas id="photoCanvas"></canvas>
-        <img id="capturedImage" alt="Ваше фото">
-        
-        <div id="confirmButtons">
-            <p>Фото готово. Отправить на анализ?</p>
-            <button id="confirmSend">Да, отправить</button>
-            <button id="retakePhoto">Переснять</button>
-        </div>
-        
-        <div id="loading">
-            Идет анализ... Подождите ~30 секунд.
-        </div>
-        
-        <div id="result"></div>
-    </div>
+  <div class="container">
+    <header>
+      <div class="logo">EcogramScan</div>
+      <p class="tagline">Анализ состава продуктов по фото</p>
+    </header>
 
-    <script src="script.js"></script>
+    <main>
+      <button id="scanButton" class="btn btn-primary">Сканировать состав</button>
+
+      <div class="camera-container">
+        <video id="cameraView" autoplay playsinline></video>
+        <canvas id="photoCanvas" style="display: none;"></canvas>
+      </div>
+      
+      <img id="capturedImage" alt="Сфотографированный состав">
+
+      <div id="confirmButtons" style="display: none;">
+        <p>Фото готово. Отправить на анализ?</p>
+        <div class="button-group">
+          <button id="confirmSend" class="btn btn-primary">Отправить</button>
+          <button id="retakePhoto" class="btn btn-secondary">Переснять</button>
+        </div>
+      </div>
+
+      <div id="loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Анализируем состав...</p>
+        <p class="text-secondary">Это займет около 30 секунд</p>
+      </div>
+
+      <div id="result" style="display: none;">
+        <div class="result-card">
+          <h3 class="result-title">Результат анализа</h3>
+          <div class="result-content" id="analysisResult"></div>
+          <div class="button-group" style="justify-content: flex-start; margin-top: 1.5rem;">
+            <button onclick="window.location.reload()" class="btn btn-primary">Новое сканирование</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

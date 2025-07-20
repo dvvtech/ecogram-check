@@ -1,94 +1,158 @@
-// Элементы DOM
-const scanButton = document.getElementById('scanButton');
-const cameraView = document.getElementById('cameraView');
-const photoCanvas = document.getElementById('photoCanvas');
-const capturedImage = document.getElementById('capturedImage');
-const confirmButtons = document.getElementById('confirmButtons');
-const confirmSend = document.getElementById('confirmSend');
-const retakePhoto = document.getElementById('retakePhoto');
-const loading = document.getElementById('loading');
-const resultDiv = document.getElementById('result');
+// Элементы интерфейса
+const UI = {
+  scanButton: document.getElementById('scanButton'),
+  cameraView: document.getElementById('cameraView'),
+  photoCanvas: document.getElementById('photoCanvas'),
+  capturedImage: document.getElementById('capturedImage'),
+  confirmButtons: document.getElementById('confirmButtons'),
+  confirmSend: document.getElementById('confirmSend'),
+  retakePhoto: document.getElementById('retakePhoto'),
+  loading: document.getElementById('loading'),
+  result: document.getElementById('result'),
+  analysisResult: document.getElementById('analysisResult')
+};
 
-let stream = null;
-let photoData = null;
+let cameraStream = null;
+let capturedPhotoData = null;
 
-// 1. Открытие камеры
-scanButton.addEventListener('click', async () => {
-    try {
-        stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { facingMode: 'environment' } // Используем заднюю камеру
-        });
-        cameraView.srcObject = stream;
-        cameraView.style.display = 'block';
-        scanButton.style.display = 'none';
-    } catch (err) {
-        alert('Ошибка доступа к камере: ' + err.message);
-        console.error(err);
-    }
-});
-
-// 2. Снимок при клике на видео
-cameraView.addEventListener('click', () => {
-    if (!stream) return;
-
-    // Настройка canvas и сохранение фото
-    photoCanvas.width = cameraView.videoWidth;
-    photoCanvas.height = cameraView.videoHeight;
-    const context = photoCanvas.getContext('2d');
-    context.drawImage(cameraView, 0, 0, photoCanvas.width, photoCanvas.height);
-
-    // Показ превью
-    capturedImage.src = photoCanvas.toDataURL('image/jpeg');
-    capturedImage.style.display = 'block';
-    cameraView.style.display = 'none';
-
-    // Остановка камеры
-    stream.getTracks().forEach(track => track.stop());
-    stream = null;
-
-    // Подтверждение
-    confirmButtons.style.display = 'block';
-    photoData = photoCanvas.toDataURL('image/jpeg').split(',')[1]; // Base64 без префикса
-});
-
-// 3. Отправка на сервер
-confirmSend.addEventListener('click', async () => {
-    confirmButtons.style.display = 'none';
-    loading.style.display = 'block';
-
-    try {
-        // Имитация запроса (замените на реальный API!)
-        const mockResponse = await mockApiRequest(photoData);
-        
-        loading.style.display = 'none';
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `
-            <h3>Результат анализа:</h3>
-            <p>${mockResponse.analysis}</p>
-            <button onclick="window.location.reload()">Сканировать еще раз</button>
-        `;
-    } catch (err) {
-        loading.style.display = 'none';
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = `<p style="color: red;">Ошибка: ${err.message}</p>`;
-    }
-});
-
-// 4. Переснять фото
-retakePhoto.addEventListener('click', () => {
-    capturedImage.style.display = 'none';
-    confirmButtons.style.display = 'none';
-    scanButton.style.display = 'block';
-});
-
-// Заглушка API (замените на реальный fetch!)
-function mockApiRequest(photoBase64) {
-    return new Promise((resolve) => {
-        setTimeout(() => {
-            resolve({
-                status: "success",
-                analysis: "Найдены: консерванты (E202), красители (E129). Безопасность: средняя."
-            });
-        }, 3000); // Уменьшил до 3 сек для удобства тестирования
-    });
+// Инициализация приложения
+function init() {
+  setupEventListeners();
 }
+
+// Настройка обработчиков событий
+function setupEventListeners() {
+  UI.scanButton.addEventListener('click', startCamera);
+  UI.cameraView.addEventListener('click', capturePhoto);
+  UI.confirmSend.addEventListener('click', sendPhotoForAnalysis);
+  UI.retakePhoto.addEventListener('click', resetCamera);
+}
+
+// Запуск камеры
+async function startCamera() {
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: 'environment',
+        width: { ideal: 1280 },
+        height: { ideal: 720 }
+      },
+      audio: false
+    });
+    
+    UI.cameraView.srcObject = cameraStream;
+    UI.cameraView.style.display = 'block';
+    UI.scanButton.style.display = 'none';
+    
+    // Плавное появление
+    UI.cameraView.style.opacity = 0;
+    setTimeout(() => UI.cameraView.style.opacity = 1, 50);
+  } catch (error) {
+    showError('Не удалось получить доступ к камере');
+    console.error('Camera error:', error);
+  }
+}
+
+// Снимок фото
+function capturePhoto() {
+  if (!cameraStream) return;
+
+  // Настройка canvas
+  const context = UI.photoCanvas.getContext('2d');
+  UI.photoCanvas.width = UI.cameraView.videoWidth;
+  UI.photoCanvas.height = UI.cameraView.videoHeight;
+  
+  // Снимок
+  context.drawImage(UI.cameraView, 0, 0, UI.photoCanvas.width, UI.photoCanvas.height);
+  
+  // Показ результата
+  UI.capturedImage.src = UI.photoCanvas.toDataURL('image/jpeg');
+  UI.capturedImage.style.display = 'block';
+  UI.cameraView.style.display = 'none';
+  
+  // Остановка камеры
+  stopCameraStream();
+  
+  // Показать кнопки подтверждения
+  UI.confirmButtons.style.display = 'block';
+  
+  // Сохранить данные фото
+  capturedPhotoData = UI.photoCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
+}
+
+// Отправка на сервер
+async function sendPhotoForAnalysis() {
+  UI.confirmButtons.style.display = 'none';
+  UI.loading.style.display = 'flex';
+  
+  try {
+    // Здесь будет реальный запрос к API
+    const analysisResult = await mockApiRequest(capturedPhotoData);
+    
+    // Показать результат
+    showAnalysisResult(analysisResult);
+  } catch (error) {
+    showError('Ошибка при анализе фото');
+    console.error('API error:', error);
+  } finally {
+    UI.loading.style.display = 'none';
+  }
+}
+
+// Показать результат анализа
+function showAnalysisResult(data) {
+  UI.analysisResult.innerHTML = `
+    <p><strong>Найдено:</strong> ${data.ingredients.join(', ')}</p>
+    <p><strong>Безопасность:</strong> <span style="color: ${getSafetyColor(data.safety)}">${data.safety}</span></p>
+    <p><strong>Рекомендация:</strong> ${data.recommendation}</p>
+  `;
+  UI.result.style.display = 'block';
+}
+
+// Сброс камеры
+function resetCamera() {
+  stopCameraStream();
+  UI.capturedImage.style.display = 'none';
+  UI.confirmButtons.style.display = 'none';
+  UI.scanButton.style.display = 'block';
+}
+
+// Остановка камеры
+function stopCameraStream() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(track => track.stop());
+    cameraStream = null;
+  }
+}
+
+// Показать ошибку
+function showError(message) {
+  UI.analysisResult.innerHTML = `<p style="color: var(--error)">${message}</p>`;
+  UI.result.style.display = 'block';
+}
+
+// Цвет для показателя безопасности
+function getSafetyColor(level) {
+  const colors = {
+    'высокая': 'var(--success)',
+    'средняя': '#FFA000',
+    'низкая': 'var(--error)'
+  };
+  return colors[level.toLowerCase()] || 'var(--text-primary)';
+}
+
+// Заглушка API (заменить на реальный запрос)
+async function mockApiRequest(photoData) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve({
+        ingredients: ['Консервант E202', 'Краситель E129', 'Эмульгатор E322'],
+        safety: 'средняя',
+        recommendation: 'Умеренное потребление. Содержит искусственные добавки.'
+      });
+    }, 3000); // Уменьшено для демонстрации
+  });
+}
+
+// Запуск приложения
+document.addEventListener('DOMContentLoaded', init);
