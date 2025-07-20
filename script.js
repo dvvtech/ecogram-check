@@ -119,10 +119,18 @@ function showAnalysisResult(data) {
 
 // Сброс камеры
 function resetCamera() {
-  stopCameraStream();
-  document.querySelector('.camera-container').style.display = 'none'; // Скрываем контейнер
+  // 1. Скрываем снимок и кнопки подтверждения
   UI.capturedImage.style.display = 'none';
   UI.confirmButtons.style.display = 'none';
+  
+  // 2. Показываем контейнер камеры и видео-элемент
+  document.querySelector('.camera-container').style.display = 'block';
+  UI.cameraView.style.display = 'block';
+  
+  // 3. Снова запускаем камеру
+  startCamera();
+  
+  // 4. Показываем кнопку "Сканировать" (на случай ошибки)
   UI.scanButton.style.display = 'block';
 }
 

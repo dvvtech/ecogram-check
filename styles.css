@@ -201,3 +201,7 @@ header {
 #cameraView {
   transition: opacity 0.3s ease; /* Плавное исчезновение */
 }
+
+.camera-container {
+  transition: opacity 0.3s ease;
+}
