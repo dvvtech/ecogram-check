@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcogramScan - Анализ состава продукта</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>EcogramScan</h1>
+        <p>Сфотографируйте состав продукта для анализа</p>
+        
+        <button id="scanButton">Сканировать состав</button>
+        
+        <video id="cameraView" autoplay></video>
+        <canvas id="photoCanvas"></canvas>
+        <img id="capturedImage" alt="Ваше фото">
+        
+        <div id="confirmButtons">
+            <p>Фото готово. Отправить на анализ?</p>
+            <button id="confirmSend">Да, отправить</button>
+            <button id="retakePhoto">Переснять</button>
+        </div>
+        
+        <div id="loading">
+            Идет анализ... Подождите ~30 секунд.
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
