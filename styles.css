@@ -197,3 +197,7 @@ header {
   justify-content: center;
   margin: 2rem 0;
 }
+
+#cameraView {
+  transition: opacity 0.3s ease; /* Плавное исчезновение */
+}

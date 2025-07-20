@@ -62,26 +62,29 @@ async function startCamera() {
 function capturePhoto() {
   if (!cameraStream) return;
 
-  // Настройка canvas
+  // 1. Настройка canvas
   const context = UI.photoCanvas.getContext('2d');
   UI.photoCanvas.width = UI.cameraView.videoWidth;
   UI.photoCanvas.height = UI.cameraView.videoHeight;
   
-  // Снимок
+  // 2. Делаем снимок
   context.drawImage(UI.cameraView, 0, 0, UI.photoCanvas.width, UI.photoCanvas.height);
   
-  // Показ результата
+  // 3. Показываем только снимок (важное изменение!)
   UI.capturedImage.src = UI.photoCanvas.toDataURL('image/jpeg');
   UI.capturedImage.style.display = 'block';
-  UI.cameraView.style.display = 'none';
   
-  // Остановка камеры
+  // 4. Скрываем ВИДЕО-элемент (ранее было только скрытие контейнера)
+  //UI.cameraView.style.display = 'none'; // ← Добавьте эту строку
+  document.querySelector('.camera-container').style.display = 'none';
+  
+  // 5. Останавливаем камеру
   stopCameraStream();
   
-  // Показать кнопки подтверждения
+  // 6. Показываем кнопки подтверждения
   UI.confirmButtons.style.display = 'block';
   
-  // Сохранить данные фото
+  // 7. Сохраняем данные фото
   capturedPhotoData = UI.photoCanvas.toDataURL('image/jpeg', 0.8).split(',')[1];
 }
 
